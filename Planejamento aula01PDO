@@ -1,0 +1,20 @@
+1 - Por enquanto podemos clonar o repositório da aula de hoje através do comando:
+
+git clone https://github.com/vtorres96/DH-FS03-PHP.git
+
+2 - Após fazer isso, devemos abrir o projeto no Visual Studio Code.
+
+3 - Abrir o Xampp Control Panel ou MAMP e startar o serviços: Apache e MySQL.
+
+Planejamento para aula de hoje
+
+1 - Criar um banco de dados aula_pdo 
+2 - Criar uma tabela de usuarios chamada usuarios dentro do banco de dados aula_pdo
+3 - Aprimorar o código do arquivo index.php para que a gente possa cadastrar um usuário no banco de dados a partir do formulário.
+4 - Aprimorar o código do arquivo login.php para verificar usuário e se o seu e-mail informado juntamente com a senha correspondem, para que possamos efetuar o login deste usuário cadastrado.
+5 - Aprimorar o código do arquivo usuarios.php, para listar os registros da tabela de usuarios, ou seja, iremos listar os usuários cadastrados em nossa base de dados.
+6 - Aprimorar o código do arquivo edita-usuario.php para possibilitar que o usuário consiga editar suas informações.
+7 - Aprimorar o código do arquivo usuarios.php para possibilitar que o usuário possa excluir um registro, ou seja, excluir um usuário.
+
+Explicação breve:
+Antes existia o MySQLi, e ele não era orientado a objetos. E também podemos pensar que MySQLi caiu em relação ao PDO, devido surportar conexão com menos drivers, ou seja, não conseguir ter uma conexão com diferentes bancos de dados, que é o caso contrário do PDO. Ou seja, no PDO temos conexão com diversos tipos de bancos de dados relacional. 
