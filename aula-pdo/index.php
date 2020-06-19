@@ -1,4 +1,6 @@
 <?php
+
+    // importante arquivo que efetua a instancia da conexao com o banco de dados
     require_once('./config/conexao.php');
 
     if(isset($_POST) && $_POST){

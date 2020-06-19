@@ -1,30 +1,27 @@
 <?php
 
+    // importando arquivo que efetua a instancia da conexao com banco de dados
+    require_once("./config/conexao.php");
+
     // obtendo usuario referente ao ID passado na URL para trazer informacoes preenchidas no formulario
     if(isset($_GET) && $_GET){
 
         // 1 - obtendo ID que recebemos como parametro na URL
         $id = $_GET["id"];
 
-        // 2 - obtendo o conteudo do arquivo usuarios.json
-        $usuariosJson = file_get_contents("./data/usuarios.json");
+        // 2 - criando query para listar o usuario encontrado pelo id na tabela de usuarios
+        $query = $dbh->prepare('select * from usuarios where id = :id');
+        
+        // 3 - executando a query para efetivamente cadastrar um novo registro na tabela de usuarios
+        $query->execute([
+            ":id" => $id
+        ]);
 
-        // 3 - transformando o conteudo do arquivo usuarios.json em um array associativo
-        $arrayUsuarios = json_decode($usuariosJson, true);
-
-        // 4 - criando um array vazio para adicionar o usuario que tem o ID correspondente passado na URL        
-        $usuarioEncontrado = [];
-
-        // 5 - percorrendo o array associativo da lista de usuarios
-        foreach ($arrayUsuarios["usuarios"] as $usuario) {
-            // verificando se encontramos o usuario para fazer a alteracao
-            if($usuario["id"] == $id){
-                array_push($usuarioEncontrado, $usuario);
-            }
-        }
+        // 4 - armazenando o retorno obtido do banco de dados em uma variavel
+        $usuarioEncontrado = $query->fetch(PDO::FETCH_ASSOC);
     }
 
-    // alterando informacoes do usuarios no arquivo usuarios.json
+    // alterando informacoes do usuarios no banco de dados
     if(isset($_POST) && $_POST){
 
         // 1 - recebendo as informacoes que o usuario preencheu no formulario 
@@ -34,32 +31,24 @@
         $email = $_POST["email"];
         $senha = $_POST["senha"];
 
-        // 2 - obtendo o conteudo do arquivo usuarios.json
-        $usuariosJson = file_get_contents("./data/usuarios.json");
-
-        // 3 - transformando o conteudo do arquivo usuarios.json em um array associativo
-        $arrayUsuarios = json_decode($usuariosJson, true);
-
-        // 4 - percorrendo o array que contem a lista de usuarios
-        foreach ($arrayUsuarios["usuarios"] as $chave => $usuario) {
-            // 5 - verificando se encontramos o usuario
-            if($usuario["id"] == $id){
-                // alterando nome, sobrenome, email e senha do usuario especifico
-                $arrayUsuarios["usuarios"][$chave]["nome"] = $nome;
-                $arrayUsuarios["usuarios"][$chave]["sobrenome"] = $sobrenome;
-                $arrayUsuarios["usuarios"][$chave]["email"] = $email;
-
-                if($senha != ""){
-                    $arrayUsuarios["usuarios"][$chave]["senha"] = $senha;
-                }
-            }
+        // 2 - verificando se foi informada uma nova senha para substituir a antiga no banco de dados
+        // caso nao tenha informado senha nenhuma iremos atribuir a senha que estava salva da ultima
+        // e ja esta criptografada, portanto, nao precisaremos criptografar de novo
+        if($senha != ""){
+            $senha = password_hash($senha, PASSWORD_DEFAULT);
         }
 
-        // 6 - transformar o conteudo do arquivo usuarios.json que foi alterado em uma string json
-        $jsonUsuarios = json_encode($arrayUsuarios);
+        // 3 - criando query para alterar as informacoes do usuario encontrado pelo id na tabela de usuarios
+        $query = $dbh->prepare("update usuarios set nome = :nome, sobrenome = :sobrenome, email = :email, senha = :senha where id = :id");
 
-        // 7 - sobrescrever o conteudo do arquivo usuarios.json
-        $alterou = file_put_contents("./data/usuarios.json", $jsonUsuarios);
+        // 4 - executando a query para efetivamente alterar as infomacoes do usuario
+        $alterou = $query->execute([
+            ":nome" => $nome,
+            ":sobrenome" => $sobrenome,
+            ":email" => $email,
+            ":senha" => $senha,
+            ":id" => $id
+        ]);
     }
 ?>
 
@@ -82,7 +71,7 @@
                             e o usuario fez uma alteracao, portanto, iremos listar a informacao obtida atraves do envio do formulario
                             para conseguir exibir o valor que o usuario altera no campo nome apos clicar no botao Editar
                         -->
-                        <input type="text" class="form-control" id="nome" name="nome" value="<?= isset($_GET["id"]) ? $usuarioEncontrado[0]["nome"] : $_POST["nome"] ?>" required>
+                        <input type="text" class="form-control" id="nome" name="nome" value="<?= isset($_GET["id"]) ? $usuarioEncontrado["nome"] : $_POST["nome"] ?>" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="sobrenome">Sobrenome</label>
@@ -92,7 +81,7 @@
                             e o usuario fez uma alteracao, portanto, iremos listar a informacao obtida atraves do envio do formulario
                             para conseguir exibir o valor que o usuario altera no campo sobrenome apos clicar no botao Editar
                         -->
-                        <input type="text" class="form-control" id="sobrenome" name="sobrenome" value="<?= isset($_GET["id"]) ? $usuarioEncontrado[0]["sobrenome"] : $_POST["sobrenome"] ?>" required>
+                        <input type="text" class="form-control" id="sobrenome" name="sobrenome" value="<?= isset($_GET["id"]) ? $usuarioEncontrado["sobrenome"] : $_POST["sobrenome"] ?>" required>
                     </div>
                 </div>
                 <div class="form-row">
@@ -104,7 +93,7 @@
                             e o usuario fez uma alteracao, portanto, iremos listar a informacao obtida atraves do envio do formulario
                             para conseguir exibir o valor que o usuario altera no campo email apos clicar no botao Editar
                         -->
-                        <input type="email" class="form-control" id="email" name="email" value="<?= isset($_GET["id"]) ? $usuarioEncontrado[0]["email"] : $_POST["email"] ?>" required>
+                        <input type="email" class="form-control" id="email" name="email" value="<?= isset($_GET["id"]) ? $usuarioEncontrado["email"] : $_POST["email"] ?>" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="senha">Senha</label>                                             
